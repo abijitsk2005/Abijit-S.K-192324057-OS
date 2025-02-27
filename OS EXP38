@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, seek_time = 0;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+    int request_queue[n];
+    printf("Enter the disk request queue:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &request_queue[i]);
+    }
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &head);
+
+    // Sort the request queue to simplify SCAN algorithm
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (request_queue[i] > request_queue[j]) {
+                int temp = request_queue[i];
+                request_queue[i] = request_queue[j];
+                request_queue[j] = temp;
+            }
+        }
+    }
+
+    // SCAN (Elevator) Scheduling
+    printf("\nSCAN (Elevator) Disk Scheduling:\n");
+    int start = 0;
+    int end = n - 1;
+    int current_direction = 1; // 1 for moving right, -1 for moving left
+
+    printf("Head Movement Sequence: %d", head); // Print initial head position
+    while (start <= end) {
+        if (current_direction == 1) {
+            int found = 0; // Flag to indicate if a request was found in the current direction
+            for (int i = start; i <= end; i++) {
+                if (request_queue[i] >= head) {
+                    seek_time += abs(head - request_queue[i]);
+                    head = request_queue[i];
+                    start = i + 1;
+                    printf(" -> %d", head); // Print head movement
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) { // If no request found in the right direction, move to the end
+                if(end>=0){
+                    seek_time += abs(head - request_queue[end]);
+                    head = request_queue[end];
+                    start = end +1;
+                    printf(" -> %d", head);
+                }
+            }
+            current_direction = -1; // Change direction
+        } else {
+            int found = 0; // Flag to indicate if a request was found in the current direction
+            for (int i = end; i >= start; i--) {
+                if (request_queue[i] <= head) {
+                    seek_time += abs(head - request_queue[i]);
+                    head = request_queue[i];
+                    end = i - 1;
+                    printf(" -> %d", head); // Print head movement
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) { // If no request found in the left direction, move to the beginning
+                if(start<n){
+                    seek_time += abs(head - request_queue[start]);
+                    head = request_queue[start];
+                    end = start-1;
+                    printf(" -> %d", head);
+                }
+            }
+            current_direction = 1; // Change direction
+        }
+    }
+    printf("\nTotal Seek Time: %d\n", seek_time);
+    printf("Average Seek Time: %.2f\n", (float)seek_time / n);
+    return 0;
+}
