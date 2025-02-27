@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, seek_time = 0;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+    int request_queue[n];
+    printf("Enter the disk request queue:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &request_queue[i]);
+    }
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &head);
+
+    // Sort the request queue for simplicity
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (request_queue[i] > request_queue[j]) {
+                int temp = request_queue[i];
+                request_queue[i] = request_queue[j];
+                request_queue[j] = temp;
+            }
+        }
+    }
+
+    // C-SCAN Scheduling
+    printf("\nC-SCAN Disk Scheduling:\n");
+    printf("Head Movement Sequence: %d", head); // Print initial head position
+    int start = 0;
+    int end = n - 1;
+    int initialHead = head; //store initial head for wrap around.
+    int found = 0;
+
+    for (int i = 0; i < n; i++) {
+        found = 0;
+        for (int j = 0; j < n; j++) {
+            if(request_queue[j] >= head){
+                if(found == 0){
+                    start = j;
+                    found = 1;
+                }
+            }
+        }
+        if(found == 0) {
+            break;
+        }
+
+        found = 0;
+        for (int j = start; j <= end; j++) {
+            if (request_queue[j] >= head) {
+                seek_time += abs(head - request_queue[j]);
+                head = request_queue[j];
+                printf(" -> %d", head);
+                start = j + 1;
+                found = 1;
+                break;
+            }
+        }
+        if(found == 0){
+            seek_time += abs(head - 0);
+            head = 0;
+            printf(" -> %d", head);
+
+            seek_time += abs(head - request_queue[0]);
+            head = request_queue[0];
+            printf(" -> %d", head);
+
+            start = 1;
+        }
+    }
+
+    printf("\nTotal Seek Time: %d\n", seek_time);
+    printf("Average Seek Time: %.2f\n", (float)seek_time / n);
+    return 0;
+}
